@@ -17,7 +17,7 @@ Frontend aplikasi dapat diunduh di:
 - BCrypt
 - Tokio
 - Serde
-- SQLx / Diesel *(sesuaikan jika digunakan)*
+- SQLx
 
 ---
 
@@ -112,4 +112,3 @@ MIT License
 Author
 
 Developed by [Adex-dev](https://github.com/adex-dev)
-
