@@ -6,10 +6,12 @@ use axum::{
 use crate::{api::handlers::login, state::AppState};
 
 pub fn create_routes()->Router<AppState>{
-    let api_v1 = Router::new()
+     let logi  = Router::new()
+    .route("/login",post(login));
+    let api_v2 = Router::new()
     .route("/login",post(login));
 
-    Router::new().nest("/api/v1", api_v1)
+    Router::new().nest("/api", logi).nest("/api/v1", api_v2)
 
 
 }

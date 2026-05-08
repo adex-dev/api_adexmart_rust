@@ -2,13 +2,13 @@ use chrono::Local;
 use regex::Regex;
 
 //format : 2026-05-07 14:30:00
-
+#[allow(dead_code)]
 pub fn time_now_modif()->String{
-    Local.now().format("%Y-%m-%d %H:%M:%S").to_string()
+    Local::now().format("%Y-%m-%d %H:%M:%S").to_string()
 }
 
 // trim + lower
-
+#[allow(dead_code)]
 pub fn convert_to_normalize_lower(value:&str)->String{
     value.trim().to_lowercase()
 }
@@ -21,17 +21,19 @@ pub fn is_empty(value:&str)->bool{
 
 
 /// Check not empty string
+#[allow(dead_code)]
 pub fn not_empty(value: &str) -> bool {
     !value.trim().is_empty()
 }
 
 /// Valid name:
 /// a-z A-Z 0-9 . space
+#[allow(dead_code)]
 pub fn is_valid_name(name: &str) -> bool {
     let regex = Regex::new(r"^[a-zA-Z0-9.\s]+$").unwrap();
     regex.is_match(name)
 }
-
+#[allow(dead_code)]
 /// Validate email
 pub fn is_valid_email(email: &str) -> bool {
     let regex =
@@ -42,6 +44,7 @@ pub fn is_valid_email(email: &str) -> bool {
 
 /// Validate price
 /// only number + dot + space
+#[allow(dead_code)]
 pub fn is_valid_price(price: &str) -> bool {
     let regex = Regex::new(r"^[0-9.\s]+$").unwrap();
     regex.is_match(price)
@@ -49,12 +52,14 @@ pub fn is_valid_price(price: &str) -> bool {
 
 /// Example:
 /// 1 => 000001
+#[allow(dead_code)]
 pub fn sequence_number(n: i32) -> String {
     format!("{:06}", n)
 }
 
 /// Example:
 /// INV-2605000001
+#[allow(dead_code)]
 pub fn prefix_module(code: &str, seq: i32) -> String {
     let date = Local::now().format("%y%m").to_string();
 
