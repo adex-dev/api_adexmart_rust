@@ -16,7 +16,8 @@ pub struct  LoginStore{
 #[allow(dead_code)]
 #[derive(FromRow)]
 pub struct  StoreEntity{
-    pub id :i32,
+    #[sqlx(default)]
+    pub id: i32,
     pub store_id:String,
     pub name:String,
     pub address:String,
@@ -25,6 +26,7 @@ pub struct  StoreEntity{
     pub phone1:String,
     pub phone2:String,
     pub status:String,
+    #[sqlx(default)]
     pub parent_id:i16,
     pub parent_area:String,
     pub created_at:Option<NaiveDateTime>,

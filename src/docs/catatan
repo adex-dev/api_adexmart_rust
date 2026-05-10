@@ -1,0 +1,110 @@
+cara debug
+    match save_refresh_token(db,&access_token.jti,&access_token.user_id.to_string(),&access_token.token.to_string(),&access_token.expires_in)
+        .await
+    {
+
+        Ok(_) => {
+            println!("SAVE SUCCESS");
+        }
+
+        Err(err) => {
+            println!("SAVE ERROR: {:?}", err);
+        }
+    };
+
+
+AMbil claim di handler
+
+    use axum::extract::Extension;
+
+    use crate::models::claims::Claims;
+
+    async fn profile(
+        Extension(claims): Extension<Claims>,
+    ) -> String {
+
+        format!(
+            "user_id={}, role={}",
+            claims.sub,
+            claims.roles
+        )
+    }
+
+| Kondisi               | Status                  |
+| ------------------------- | --------------------------- |
+| Data berhasil dibuat  | `201 Created`           |
+| Request invalid       | `400 Bad Request`       |
+| Tidak login/token invalid | `401 Unauthorized`      |
+| Tidak punya akses     | `403 Forbidden`         |
+| Data sudah ada/duplicate  | `409 Conflict`          |
+| Validasi gagal        | `422 Unprocessable Entity`  |
+| Error server          | `500 Internal Server Error` |
+| Kondisi          | Status                  |
+| -------------------- | --------------------------- |
+| Data ditemukan   | `200 OK`                |
+| Data tidak ditemukan | `404 Not Found`         |
+| Tidak login      | `401 Unauthorized`      |
+| Tidak punya akses| `403 Forbidden`         |
+| Error server     | `500 Internal Server Error` |
+| Kondisi                | Status                  |
+| -------------------------- | --------------------------- |
+| Berhasil update        | `200 OK`                |
+| Berhasil update tanpa body | `204 No Content`        |
+| Data tidak ditemukan   | `404 Not Found`         |
+| Validasi gagal         | `422 Unprocessable Entity`  |
+| Duplicate conflict     | `409 Conflict`          |
+| Tidak login            | `401 Unauthorized`      |
+| Tidak punya akses      | `403 Forbidden`         |
+| Error server           | `500 Internal Server Error` |
+| Kondisi                    | Status                      |
+| -------------------------- | --------------------------- |
+| Berhasil delete            | `200 OK`                    |
+| Berhasil delete tanpa body | `204 No Content`            |
+| Data tidak ditemukan       | `404 Not Found`             |
+| Tidak punya akses          | `403 Forbidden`             |
+| Tidak login                | `401 Unauthorized`          |
+| Error server               | `500 Internal Server Error` |
+| Kondisi             | Status             |
+| ------------------- | ------------------ |
+| Login berhasil      | `200 OK`           |
+| Token expired       | `401 Unauthorized` |
+| Token invalid       | `401 Unauthorized` |
+| Tidak membawa token | `401 Unauthorized` |
+| Password salah      | `401 Unauthorized` |
+| Akun diblokir       | `403 Forbidden`    |
+| Kondisi                 | Status                     |
+| ----------------------- | -------------------------- |
+| JSON invalid            | `400 Bad Request`          |
+| Field required kosong   | `422 Unprocessable Entity` |
+| Format email salah      | `422 Unprocessable Entity` |
+| Password terlalu pendek | `422 Unprocessable Entity` |
+| Kondisi                    | Status                       |
+| -------------------------- | ---------------------------- |
+| Upload berhasil            | `201 Created`                |
+| File terlalu besar         | `413 Payload Too Large`      |
+| Format file tidak didukung | `415 Unsupported Media Type` |
+| Kondisi                | Status                  |
+| ---------------------- | ----------------------- |
+| Terlalu banyak request | `429 Too Many Requests` |
+| Kondisi            | Status                      |
+| ------------------ | --------------------------- |
+| Error internal     | `500 Internal Server Error` |
+| Database down      | `503 Service Unavailable`   |
+| Dependency timeout | `504 Gateway Timeout`       |
+| Method   | Success                     |
+| -------- | --------------------------- |
+| `POST`   | `201 Created`               |
+| `GET`    | `200 OK`                    |
+| `PUT`    | `200 OK` / `204 No Content` |
+| `PATCH`  | `200 OK`                    |
+| `DELETE` | `204 No Content`            |
+
+
+//untuk menghasilkan key baru
+use chacha20poly1305::aead::OsRng;
+use chacha20poly1305::{ChaCha20Poly1305, KeyInit};
+
+fn main() {
+    let key = ChaCha20Poly1305::generate_key(&mut OsRng);
+    println!("{}", base64::encode(key));
+}

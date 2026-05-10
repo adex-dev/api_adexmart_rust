@@ -18,6 +18,7 @@ Frontend aplikasi dapat diunduh di:
 - Tokio
 - Serde
 - SQLx
+- ChaCha20Poly1305
 
 ---
 
@@ -33,6 +34,7 @@ Frontend aplikasi dapat diunduh di:
 - Dashboard POS
 - Sistem Backend Async
 - JSON Response API
+- ChaCha20Poly1305 digunakan sebagai encryption data token yang dikirim pada json token access pada saat login
 
 ---
 

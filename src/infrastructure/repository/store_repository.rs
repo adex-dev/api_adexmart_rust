@@ -9,7 +9,7 @@ pub async fn find_store_by_id(
     let store = sqlx::query_as::<_,StoreEntity>(
         r#"
         SELECT 
-		s.storeid,
+		s.storeid as store_id,
 		s.name,
 		s.address,
 		s.cities,
@@ -17,9 +17,9 @@ pub async fn find_store_by_id(
 		s.phone1,
 		s.phone2,
 		s.status,
-		sa.name as parentname,
+		sa.name as parent_area,
 		s.created_at,
-		s.modif_at
+		s.modif_at as modified
 	FROM stores s
 	LEFT JOIN store_area sa ON s.parent_area = sa.id
 	WHERE 1=1 AND s.storeid=$1 LIMIT 1
@@ -27,5 +27,6 @@ pub async fn find_store_by_id(
     ).bind(store_id)
     .fetch_all(db)
     .await?;
+
 Ok(store)
 }

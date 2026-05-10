@@ -11,14 +11,18 @@ use crate::state::AppState;
 use axum::{Router};
 use dotenvy::dotenv;
 use tokio::net::TcpListener;
-
-
 #[tokio::main]
 async fn main() {
     dotenv().ok();
     let db = config::connect_db().await;
     let app_state = AppState {db };
     let app = Router::new().merge(api::routes::create_routes()).with_state(app_state);
-    let listener = TcpListener::bind("0.0.0.0:3000").await.unwrap();
+    let app_run = format!(
+        "{}:{}",
+        std::env::var("APP_IP").unwrap(),
+        std::env::var("APP_PORT").unwrap()
+    );
+    let listener = TcpListener::bind(app_run).await.unwrap();
+    println!("Running On Port:{}",listener.local_addr().unwrap());
     axum::serve(listener, app).await.unwrap()
 }

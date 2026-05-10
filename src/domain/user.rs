@@ -42,12 +42,22 @@ pub struct LoginRequest{
 }
 
 #[derive(Debug,Serialize)]
+pub struct LoginResult {
+    pub refresh_token: TokenEntity,
+    pub response_data: LoginResponse,
+}
+#[derive(Debug,Serialize)]
+pub struct TokenEntity {
+    pub token: String,
+}
+#[derive(Debug,Serialize)]
 pub struct  LoginResponse{
     pub user:UserResponse,
-    pub token:String,
+    pub access_token:String,
     pub modul_access: Vec<UserAccessResponse>,
     pub store:Vec<LoginStore>
 }
+
 
 #[derive(Debug,Serialize)]
 pub struct UserAccessResponse{
@@ -59,4 +69,11 @@ pub struct UserAccessResponse{
 pub struct UserAccessEntity{
     pub id:i32,
     pub  name:String
+}
+
+#[derive(Debug,FromRow,Serialize)]
+pub struct TokenRefreshEntity{
+    pub token_hash:String,
+    pub expires_at:chrono::NaiveDateTime,
+    pub revoked:bool
 }
