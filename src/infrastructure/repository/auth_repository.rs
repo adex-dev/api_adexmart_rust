@@ -40,7 +40,7 @@ pub async fn find_token(
 pub async fn delete_token(db: &Pool<Postgres>) -> Result<(), sqlx::Error> {
     sqlx::query(
         r#"
-DELETE FROM refresh_tokens WHERE expires_at < NOW()
+        DELETE FROM refresh_tokens WHERE expires_at < NOW()
 "#,
     )
     .execute(db)
@@ -76,11 +76,8 @@ pub async fn logout_token(
     let jti = parse_jti(jti)?;
     sqlx::query(
         r#"
-UPDATE refresh_tokens SET revoked=TRUE WHERE jti = $1
-"#,
-    )
-        .bind(jti)
-        .execute(db)
+        UPDATE refresh_tokens SET revoked=TRUE WHERE jti = $1"#
+    ).bind(jti).execute(db)
         .await
         .map_err(|e| AppError::Validation(e.to_string()))?;
     Ok(())

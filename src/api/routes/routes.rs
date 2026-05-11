@@ -14,7 +14,6 @@ use axum::{
 use tower_http::cors::{ CorsLayer};
 use crate::{api::handlers::login, state::AppState, api::handlers::refresh, api::middleware::jwt::jwt_middleware};
 use crate::api::handlers::auth_handler::refresh_full;
-
 pub fn create_routes() ->Router<AppState>{
     let cors =CorsLayer::new()
         .allow_origin([
@@ -32,10 +31,9 @@ pub fn create_routes() ->Router<AppState>{
             AUTHORIZATION,
             CONTENT_TYPE,
             ACCEPT
-        ])
-        .allow_credentials(true);
-     let logi  = Router::new()
-    .route("/login",post(login));
+        ]).allow_credentials(true);
+    let logi  = Router::new()
+        .route("/login",post(login));
     let auth_routes = Router::new()
         .route("/refresh", post(refresh))
         .route("/refressh", post(refresh_full));

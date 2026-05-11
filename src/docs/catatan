@@ -108,3 +108,90 @@ fn main() {
     let key = ChaCha20Poly1305::generate_key(&mut OsRng);
     println!("{}", base64::encode(key));
 }
+
+// Query update
+pub async fn logout_token(
+    db: &Pool<Postgres>,
+    jti: &str,
+) -> Result<(), AppError> {
+    let jti = parse_jti(jti)?;
+   let result_update = sqlx::query!(
+        r#"
+        UPDATE refresh_tokens SET revoked=TRUE WHERE jti = COALESCE($1,jti)"#,jti
+    ).execute(db)
+        .await
+        .map_err(|e| AppError::Validation(e.to_string()))?;
+    match result_update{
+        Ok(
+            if result_update.row_affected() > 0 {
+                return Ok
+            }
+        )
+    }
+}
+
+dinamis Query
+// let mut query = String::from("UPDATE products SET ");
+
+// if payload.stock.is_some() {
+//     query.push_str("stock = ?,");
+// }
+
+| Kasus                    | Method |
+| ------------------------ | ------ |
+| Edit seluruh produk      | PUT    |
+| Update stok              | PATCH  |
+| Update harga             | PATCH  |
+| Update status order      | PATCH  |
+| Sinkronisasi master data | PUT    |
+
+PUT
+
+Struct wajib:
+
+name: String
+PATCH
+
+Struct optional:
+
+name: Option<String>
+
+
+Tanpa Option
+struct User {
+    name: String
+}
+
+Artinya:
+
+name wajib ada
+tidak boleh kosong dari sisi tipe
+serde akan error jika field tidak dikirim
+
+
+bisa juga pakai serde
+bisa pakai:
+
+#[serde(skip_serializing_if = "Option::is_none")]
+
+Contoh:
+
+#[derive(Serialize)]
+struct LoginResponse {
+    name: String,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    phone: Option<String>,
+}
+
+penggunaan path
+use std::path::PathBuf;
+
+let storage_path = std::env::var("STORAGE_PATH")
+    .unwrap_or("src/storage".to_string());
+
+let file_path = PathBuf::from(&storage_path)
+    .join("users")
+    .join("avatar.png");
+
+println!("{:?}", file_path);

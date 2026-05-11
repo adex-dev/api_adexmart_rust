@@ -27,9 +27,14 @@ pub async fn login_service(
     let user = user_repository::find_by_username(db, &payload.username)
         .await
         .map_err(|_| AppError::NotFound("User tidak ditemukan".to_string()))?;
-
-    let valid_password = check_password(&user.password, &payload.password)
-        .map_err(|_| AppError::Unauthorized("Password gagal diverifikasi".to_string()))?;
+    let hashed_password = user.password.clone();
+    let plain_password = payload.password.clone();
+    let valid_password = tokio::task::spawn_blocking(move||{
+        check_password(&hashed_password, &plain_password)
+    }).await
+            .map_err(|_| AppError::Unauthorized("Task Gagal".to_string()))?
+            .map_err(|_| AppError::Unauthorized("Password gagal diverifikasi".to_string()))?;
+    
     if !valid_password {
         return Err(AppError::Unauthorized("Password salah".to_string()));
     }

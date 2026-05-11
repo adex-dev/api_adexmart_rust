@@ -12,7 +12,7 @@ pub fn generate_access_token(
 )->Result<String,String>{
     let now = Utc::now();
     let expiration = now + Duration::minutes(15);
-    let jti = Uuid::new_v4();
+    let jti = Uuid::new_v7();
     let user_id =user_id.to_string();
     let claims = Claims{
         iss:"pos-system".to_string(),
@@ -35,7 +35,7 @@ pub fn generate_refresh_token(
 )->Result<TokenResponse,String>{
     let now = Utc::now();
     let expiration = now + Duration::days(7);
-    let jti = Uuid::new_v4();
+    let jti = Uuid::new_v7();
     let claims = RefreshClaims{
         iss:"pos-system".to_string(),
         sub:user_id.to_string(),
