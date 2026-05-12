@@ -51,10 +51,10 @@ pub fn verify_access_token(
             std::env::var("JWT_SECRET").unwrap().as_bytes(),
         ),
         &Validation::default()
-    ).map_err(|e|AppError::UnauthorizedAuth(e.to_string()))?;
+    ).map_err(|e|AppError::UnauthorizedAuth(0i8,"Authorization".to_string(),e.to_string()))?;
     let claims = decoded.claims;
     if claims.r#type !="access-token" {
-        return Err(AppError::UnauthorizedAuth("Invalid Token Type".to_string()));
+        return Err(AppError::UnauthorizedAuth(0i8,"Authorization".to_string(),"Invalid Token Type".to_string()));
     }
     Ok(claims)
 }
@@ -75,28 +75,28 @@ pub fn verify_refresh_token(
     ).map_err(|e|{
         match *e.kind() {
             ErrorKind::ExpiredSignature =>{
-                AppError::UnauthorizedAuth("Token Expired".to_string())
+                AppError::UnauthorizedAuth(0i8,"Authorization".to_string(),"Token Expired".to_string())
             }
             ErrorKind::InvalidToken =>{
-                AppError::UnauthorizedAuth("Invalid Token".to_string())
+                AppError::UnauthorizedAuth(0i8,"Authorization".to_string(),"Invalid Token".to_string())
             }
             ErrorKind::InvalidSignature =>{
-                AppError::UnauthorizedAuth("Invalid Signature".to_string())
+                AppError::UnauthorizedAuth(0i8,"Authorization".to_string(),"Invalid Signature".to_string())
             }
             ErrorKind::InvalidAudience => {
                 AppError::UnauthorizedAuth(
-                    "Invalid Audience".to_string()
+                    0i8,"Authorization".to_string(),"Invalid Audience".to_string()
                 )
             }
             _=>{
-                AppError::UnauthorizedAuth("Token Error".to_string())
+                AppError::UnauthorizedAuth(0i8,"Authorization".to_string(),"Token Error".to_string())
             }
         }
     })?;
 
     let claims = decoded.claims;
     if claims.r#type !="refresh-token" {
-        return Err(AppError::UnauthorizedAuth("Invalid Token Type".to_string()));
+        return Err(AppError::UnauthorizedAuth(0i8,"Authorization".to_string(),"Invalid Token Type".to_string()));
     }
     Ok(claims)
 }

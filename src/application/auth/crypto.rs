@@ -15,7 +15,7 @@ pub fn encrypt_token(key: &[u8;32],data:&[u8])
 
     let mut ciphertext = cipher.encrypt(
         nonce_obj,data)
-        .map_err(|_| AppError::Unauthorized("encrypt error".to_string()))?;
+        .map_err(|_| AppError::UnauthorizedAuth(0i8,"Authorization".to_string(),"encrypt error".to_string()))?;
 
 
   let mut blob = Vec::with_capacity(12 + ciphertext.len());
@@ -36,12 +36,12 @@ pub fn decrypt_token(
 
     cipher
         .decrypt(nonce, ciphertext)
-        .map_err(|_| AppError::Internal("decrypt failed".into()))
+        .map_err(|_| AppError::UnauthorizedAuth(0i8,"Authorization".to_string(),"decrypt failed".into()))
 }
 
 pub fn api_token_encrypt(token:&str)->Result<String,AppError>{
     let key = load_key()?;
-    let encrypted = encrypt_token(&key,token.as_bytes()).map_err(|e| AppError::Unauthorized(e.to_string()))?;
+    let encrypted = encrypt_token(&key,token.as_bytes()).map_err(|e| AppError::UnauthorizedAuth(0i8,"Authorization".to_string(),e.to_string()))?;
     Ok(general_purpose::STANDARD.encode(&encrypted))
 }
 
@@ -49,11 +49,11 @@ pub fn api_token_encrypt(token:&str)->Result<String,AppError>{
 pub  fn api_token_decrypt(token:&str)->Result<String,AppError>{
     let key = load_key()?;
     let decoded = base64::engine::general_purpose::STANDARD.decode(token)
-        .map_err(|_| AppError::Internal("decode api_token_decrypt error".to_string()))?;
+        .map_err(|_| AppError::UnauthorizedAuth(0i8,"Authorization".to_string(),"decode api_token_decrypt error".to_string()))?;
 
-    let decrypted = decrypt_token(&key,&decoded).map_err(|e| AppError::Unauthorized(e.to_string()))?;
+    let decrypted = decrypt_token(&key,&decoded).map_err(|e| AppError::Unauthorized(0i8,"Authorization".to_string(),e.to_string()))?;
 
     let jwt = String::from_utf8(decrypted)
-        .map_err(|_| AppError::Internal("decode jwt error".to_string()))?;
+        .map_err(|_| AppError::UnauthorizedAuth(0i8,"Authorization".to_string(),"decode jwt error".to_string()))?;
     Ok(jwt)
 }

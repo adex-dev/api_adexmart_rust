@@ -26,17 +26,17 @@ pub async fn login_service(
 ) -> Result<LoginResult, AppError> {
     let user = user_repository::find_by_username(db, &payload.username)
         .await
-        .map_err(|_| AppError::NotFound("User tidak ditemukan".to_string()))?;
+        .map_err(|_| AppError::NotFound(4i8,"Users".to_string(),"User tidak ditemukan".to_string()))?;
     let hashed_password = user.password.clone();
     let plain_password = payload.password.clone();
     let valid_password = tokio::task::spawn_blocking(move||{
         check_password(&hashed_password, &plain_password)
     }).await
-            .map_err(|_| AppError::Unauthorized("Task Gagal".to_string()))?
-            .map_err(|_| AppError::Unauthorized("Password gagal diverifikasi".to_string()))?;
+            .map_err(|_| AppError::Unauthorized(7i8,"Task".to_string(),"Task Gagal".to_string()))?
+            .map_err(|_| AppError::Unauthorized(7i8,"Validation".to_string(),"Password gagal diverifikasi".to_string()))?;
     
     if !valid_password {
-        return Err(AppError::Unauthorized("Password salah".to_string()));
+        return Err(AppError::Unauthorized(7i8,"Validation".to_string(),"Password salah".to_string()));
     }
     if &user.status != "active" {
         let message = match user.status.as_str() {
@@ -45,7 +45,7 @@ pub async fn login_service(
             "block" => "akses user sudah dihapus",
             _ => "akses ditolak Modul",
         };
-        return Err(AppError::Unauthorized(message.to_string()));
+        return Err(AppError::Unauthorized(7i8,"Validation".to_string(),message.to_string()));
     }
     let required_access = commons::required_access_roles();
     let is_access_restricted = required_access.contains(&user.roles);
@@ -54,13 +54,13 @@ pub async fn login_service(
         .unwrap_or(vec![]);
 
     if user_access.is_empty() && is_access_restricted {
-        return Err(AppError::Unauthorized("Akses ditolak".to_string()));
+        return Err(AppError::Unauthorized(7i8,"Validation".to_string(),"Akses ditolak".to_string()));
     }
     let required_access_store = commons::required_access_store_roles();
     let is_store_restricted = required_access_store.contains(&user.roles);
 
     if !is_store_restricted && commons::is_empty(&user.store_id) {
-        return Err(AppError::Unauthorized(
+        return Err(AppError::Unauthorized(7i8,"Validation".to_string(),
             "Akses tidak di izinkan anda wajib memasukan store login".to_string(),
         ));
     }
@@ -69,9 +69,9 @@ pub async fn login_service(
         .unwrap_or(vec![]);
 
     let access_token = generate_access_token(&user.id_user, &user.roles)
-        .map_err(|_| AppError::UnauthorizedAuth("Generate token access gagal".to_string()))?;
+        .map_err(|_| AppError::UnauthorizedAuth(0i8,"Authorization".to_string(),"Generate token access gagal".to_string()))?;
     let refresh_token = generate_refresh_token(&user.id_user, &user.roles)
-        .map_err(|_| AppError::UnauthorizedAuth("Generate token refresh gagal".to_string()))?;
+        .map_err(|_| AppError::UnauthorizedAuth(0i8,"Authorization".to_string(),"Generate token refresh gagal".to_string()))?;
     let _ = save_refresh_token(
         db,
         &refresh_token.jti,
@@ -105,17 +105,17 @@ pub async fn check_token_refresh(
     let time_now = chrono::Utc::now().naive_utc();
     let find_token = auth_repository::find_token(db, &jti).await.map_err(|e| {
         println!("find_token{}", e);
-        AppError::UnauthorizedAuth("checkToken Invalid".to_string())
+        AppError::UnauthorizedAuth(0i8,"Authorization".to_string(),"checkToken Invalid".to_string())
     })?;
     if find_token.revoked {
-        return Err(AppError::UnauthorizedAuth("Token revoked".to_string()));
+        return Err(AppError::UnauthorizedAuth(0i8,"Authorization".to_string(),"Token revoked".to_string()));
     }
     if time_now > find_token.expires_at {
         let _ = logout_token(db,jti);
-        return Err(AppError::UnauthorizedAuth("Token Expired".to_string()));
+        return Err(AppError::UnauthorizedAuth(0i8,"Authorization".to_string(),"Token Expired".to_string()));
     }
     if token != find_token.token_hash {
-        return Err(AppError::UnauthorizedAuth("Token mismatch".to_string()));
+        return Err(AppError::UnauthorizedAuth(0i8,"Authorization".to_string(),"Token mismatch".to_string()));
     }
     Ok(true)
 }
@@ -128,16 +128,16 @@ pub async fn check_token_refresh_full(
     let claims = verify_refresh_token(&token)?;
     let row_token_db = check_token_refresh(db,&claims.jti,token).await
     .map_err(|e| {
-        AppError::UnauthorizedAuth(e.to_string())})?;
+        AppError::UnauthorizedAuth(0i8,"Authorization".to_string(),e.to_string())})?;
     if !row_token_db {
-        return Err(AppError::UnauthorizedAuth("Token Refresh Not Found".to_string()));
+        return Err(AppError::UnauthorizedAuth(0i8,"Authorization".to_string(),"Token Refresh Not Found".to_string()));
     }
     let access_token = generate_access_token(&claims.sub.to_string(),&claims.roles.to_string())
-        .map_err(|_| AppError::UnauthorizedAuth("Generate token access gagal".to_string()))?;
+        .map_err(|_| AppError::UnauthorizedAuth(0i8,"Authorization".to_string(),"Generate token access gagal".to_string()))?;
     let token_encryption = api_token_encrypt(&access_token)?;
     let user = user_repository::find_by_id(db, &claims.sub)
         .await
-        .map_err(|_| AppError::NotFound("User tidak ditemukan".to_string()))?;
+        .map_err(|_| AppError::UnauthorizedAuth(0i8,"Authorization".to_string(),"User tidak ditemukan".to_string()))?;
     let required_access = commons::required_access_roles();
     let is_access_restricted = required_access.contains(&user.roles);
     let user_access = auth_repository::find_user_access(db, &user.id_user)
@@ -145,13 +145,13 @@ pub async fn check_token_refresh_full(
         .unwrap_or(vec![]);
 
     if user_access.is_empty() && is_access_restricted {
-        return Err(AppError::Unauthorized("Akses ditolak".to_string()));
+        return Err(AppError::UnauthorizedAuth(0i8,"Authorization".to_string(),"Akses ditolak".to_string()));
     }
     let required_access_store = commons::required_access_store_roles();
     let is_store_restricted = required_access_store.contains(&user.roles);
 
     if !is_store_restricted && commons::is_empty(&user.store_id) {
-        return Err(AppError::Unauthorized(
+        return Err(AppError::UnauthorizedAuth(0i8,"Authorization".to_string(),
             "Akses tidak di izinkan anda wajib memasukan store login".to_string(),
         ));
     }

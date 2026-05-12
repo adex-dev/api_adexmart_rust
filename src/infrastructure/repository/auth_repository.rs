@@ -33,7 +33,7 @@ pub async fn find_token(
         WHERE jti= $1
         "#
 ).bind(jti).fetch_one(db).await
-        .map_err(|e| AppError::Validation(e.to_string()))?;
+        .map_err(|e| AppError::NotFound(4i8,"Token Not Found".to_string(),e.to_string()))?;
     Ok(row)
 }
 
@@ -79,12 +79,12 @@ pub async fn logout_token(
         UPDATE refresh_tokens SET revoked=TRUE WHERE jti = $1"#
     ).bind(jti).execute(db)
         .await
-        .map_err(|e| AppError::Validation(e.to_string()))?;
+        .map_err(|e| AppError::DatabaseDown(8i8,"Failed Revoke token".to_string(),e.to_string()))?;
     Ok(())
 }
 
 
 pub fn parse_jti(value: &str) -> Result<Uuid, AppError> {
     Uuid::parse_str(value)
-        .map_err(|_| AppError::BadRequest("invalid uuid".to_string()))
+        .map_err(|_| AppError::BadRequest(6i8,"Parse JTI".to_string(),"invalid uuid".to_string()))
 }

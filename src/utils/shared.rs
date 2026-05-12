@@ -4,38 +4,38 @@ use thiserror::Error;
 #[derive(Debug,Error)]
 pub enum AppError {
     #[error("Unauthorized error: {0}")]
-    Unauthorized(String),
+    Unauthorized(i8,String,String),
     #[error("NotFound : {0}")]
-    NotFound(String),
+    NotFound(i8,String,String),
     #[error("Validation : {0}")]
-    Validation(String),
+    Validation(i8,String,String),
     #[error("Conflict : {0}")]
-    Conflict(String),
+    Conflict(i8,String,String),
     #[error("internal : {0}")]
-    Internal(String),
+    Internal(i8,String,String),
     #[error("UnauthorizedAuth : {0}")]
-    UnauthorizedAuth(String),
+    UnauthorizedAuth(i8,String,String),
     #[error("BadRequest : {0}")]
-    BadRequest(String),
+    BadRequest(i8,String,String),
     #[error("Forbidden : {0}")]
-    Forbidden(String),
+    Forbidden(i8,String,String),
     #[error("Unprocessable : {0}")]
-    Unprocessable(String),
+    Unprocessable(i8,String,String),
     #[error("PayloadLarge : {0}")]
-    PayloadLarge(String),
+    PayloadLarge(i8,String,String),
     #[error("UnsupportedMedia : {0}")]
-    UnsupportedMedia(String),
+    UnsupportedMedia(i8,String,String),
     #[error("TooManyRequest : {0}")]
-    TooManyRequest(String),
+    TooManyRequest(i8,String,String),
     #[error("DatabaseDown : {0}")]
-    DatabaseDown(String),
+    DatabaseDown(i8,String,String),
     #[error("GatewayDown : {0}")]
-    GatewayDown(String),
+    GatewayDown(i8,String,String),
 }
 #[allow(dead_code)]
 #[derive(Debug)]
 pub enum AppSuccess {
-    OK(String),
-    Created(String),
-    NoContent(String),
+    OK(i8,String,String),
+    Created(i8,String,String),
+    NoContent(i8,String,String),
 }

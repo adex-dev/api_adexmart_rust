@@ -7,16 +7,16 @@ pub fn load_key() ->Result<[u8; 32],AppError>{
     let key_b64 = std::env::var("CRYPTO_KEY")
         .map_err(|e| {
             println!("{}", e);
-            AppError::Internal("Missing CRYPTO_KEY environment variable.".to_string())
+            AppError::Internal(0i8,"Missing Keys".to_string(),"Missing CRYPTO_KEY environment variable.".to_string())
         })?;
     let decoded_key = general_purpose::STANDARD.decode(&key_b64)
         .map_err(|e| {
             println!("{}", e.to_string());
-            AppError::Internal("Decode error.".to_string())
+            AppError::Internal(0i8,"Decode Error".to_string(),"Decode error.".to_string())
         })?;
 
     if decoded_key.len() != 32 {
-        return Err(AppError::Internal(
+        return Err(AppError::Internal(0i8,"Internal Error".to_string(),
             format!("Invalid key length: {}", decoded_key.len())
         ));
     }

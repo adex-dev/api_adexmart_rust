@@ -77,7 +77,8 @@ pub fn splits_prefix_module(code:&str, value:&str) ->bool{
 
 pub fn response_body(
     status_code: StatusCode,
-    status: &bool,
+    status: &i8,
+    status_label: &str,
     message: &str,
 ) -> Response {
 
@@ -89,6 +90,7 @@ pub fn response_body(
         ]),
         Json(Responses {
             status: *status,
+            status_label:status_label.to_string(),
             message: message.to_string(),
         }),
     ).into_response()
@@ -96,73 +98,76 @@ pub fn response_body(
 impl IntoResponse for AppError {
     fn into_response(self) -> Response {
 
-        let (status_code, message) = match self {
+        let (status_code,status,status_label, message) = match self {
 
-            AppError::Unauthorized(msg) => {
-                (StatusCode::UNAUTHORIZED, msg)
+            AppError::Unauthorized(status,status_label,msg) => {
+                (StatusCode::UNAUTHORIZED,status,status_label, msg)
             }
-            AppError::UnauthorizedAuth(msg) => {
-                return  auth_error(&msg);
+            AppError::UnauthorizedAuth(status,status_label,msg) => {
+                return  auth_error(&status,&status_label,&msg);
             }
-            AppError::NotFound(msg) => {
-                (StatusCode::NOT_FOUND, msg)
+            AppError::NotFound(status,status_label,msg) => {
+                (StatusCode::NOT_FOUND,status,status_label, msg)
             }
-            AppError::Validation(msg) => {
-                (StatusCode::UNPROCESSABLE_ENTITY, msg)
+            AppError::Validation(status,status_label,msg) => {
+                (StatusCode::UNPROCESSABLE_ENTITY,status,status_label, msg)
             }
-            AppError::Conflict(msg) => {
-                (StatusCode::CONFLICT, msg)
+            AppError::Conflict(status,status_label,msg) => {
+                (StatusCode::CONFLICT,status,status_label, msg)
             }
-            AppError::Internal(msg) => {
-                (StatusCode::INTERNAL_SERVER_ERROR, msg)
+            AppError::Internal(status,status_label,msg) => {
+                (StatusCode::INTERNAL_SERVER_ERROR,status,status_label, msg)
             }
-            AppError::BadRequest(msg) => {
-                (StatusCode::BAD_REQUEST, msg)
+            AppError::BadRequest(status,status_label,msg) => {
+                (StatusCode::BAD_REQUEST,status,status_label, msg)
             }
-            AppError::Forbidden(msg) => {
-                (StatusCode::FORBIDDEN, msg)
+            AppError::Forbidden(status,status_label,msg) => {
+                (StatusCode::FORBIDDEN,status,status_label, msg)
             }
-            AppError::Unprocessable(msg) => {
-                (StatusCode::UNPROCESSABLE_ENTITY, msg)
+            AppError::Unprocessable(status,status_label,msg) => {
+                (StatusCode::UNPROCESSABLE_ENTITY,status,status_label, msg)
             }
-            AppError::PayloadLarge(msg) => {
-                (StatusCode::PAYLOAD_TOO_LARGE, msg)
+            AppError::PayloadLarge(status,status_label,msg) => {
+                (StatusCode::PAYLOAD_TOO_LARGE,status,status_label, msg)
             }
-            AppError::UnsupportedMedia(msg) => {
-                (StatusCode::UNSUPPORTED_MEDIA_TYPE, msg)
+            AppError::UnsupportedMedia(status,status_label,msg) => {
+                (StatusCode::UNSUPPORTED_MEDIA_TYPE,status,status_label, msg)
             }
-            AppError::TooManyRequest(msg) => {
-                (StatusCode::TOO_MANY_REQUESTS, msg)
+            AppError::TooManyRequest(status,status_label,msg) => {
+                (StatusCode::TOO_MANY_REQUESTS,status,status_label, msg)
             }
-            AppError::DatabaseDown(msg) => {
-                (StatusCode::SERVICE_UNAVAILABLE, msg)
+            AppError::DatabaseDown(status,status_label,msg) => {
+                (StatusCode::SERVICE_UNAVAILABLE,status,status_label, msg)
             }
-            AppError::GatewayDown(msg) => {
-                (StatusCode::GATEWAY_TIMEOUT, msg)
+            AppError::GatewayDown(status,status_label,msg) => {
+                (StatusCode::GATEWAY_TIMEOUT,status,status_label, msg)
             }
         };
 
         (
             status_code,
-            response_body(status_code,&false, &message),
+            response_body(status_code,&status,&status_label, &message),
         )
             .into_response()
     }
 }
 #[allow(dead_code)]
 pub fn success_body(
-    status: StatusCode,
+    status_code: StatusCode,
+    status_label: &str,
+    status:&i8,
     message: &str,
 ) -> Response {
 
     (
-        status,
+        status_code,
         AppendHeaders([
             ("x-api-version", "v1"),
             ("x-powered-by", "Akmad Nudin"),
         ]),
-        Json(Responses {
-            status: true,
+        Json(Responses { 
+            status: *status,
+            status_label:status_label.to_string(),
             message: message.to_string(),
         }),
     ).into_response()
@@ -170,27 +175,29 @@ pub fn success_body(
 
 impl IntoResponse for AppSuccess{
     fn into_response(self) -> Response {
-        let (status_code,messsage) = match self {
-            AppSuccess::OK(msg) => {
-                (StatusCode::OK,msg)
+        let (status_code,status,status_label,messsage) = match self {
+            AppSuccess::OK(status,status_label,msg) => {
+                (StatusCode::OK,status,status_label,msg)
             }
 
-            AppSuccess::Created(msg) =>{
-                (StatusCode::CREATED, msg)
+            AppSuccess::Created(status,status_label,msg) =>{
+                (StatusCode::CREATED,status,status_label, msg)
             }
-            AppSuccess::NoContent(msg) =>{
-                (StatusCode::NO_CONTENT, msg)
+            AppSuccess::NoContent(status,status_label,msg) =>{
+                (StatusCode::NO_CONTENT,status,status_label, msg)
             }
 
         };
         (
             status_code,
-            response_body(status_code,&true, &messsage),
+            response_body(status_code,&status,&status_label, &messsage),
             ).into_response()
     }
 }
 
 pub fn auth_error(
+    status:&i8,
+    status_label:&str,
     message: &str,
 ) -> Response {
 
@@ -205,7 +212,8 @@ pub fn auth_error(
             ("x-powered-by", "Akmad Nudin"),
         ]),
         Json(json!({
-            "status": false,
+            "status": *status,
+            "status_label":status_label,
             "message": message
         })),
     )

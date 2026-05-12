@@ -33,7 +33,8 @@ pub async fn login(
             ("x-powered-by", "Akmad Nudin".to_string()),
         ]),
         Json(json!({
-            "status": true,
+            "status": 0,
+            "status_label":"Login",
             "data": result.response_data,
         })),
     ))
@@ -45,21 +46,21 @@ pub async fn refresh(
 ) -> Result<impl IntoResponse, AppError> {
     let cookie = jar.get("refresh-token");
     let token_header = cookie
-        .ok_or(AppError::UnauthorizedAuth(
+        .ok_or(AppError::UnauthorizedAuth(0i8,"Cookie".to_string(),
             "Cookie tidak ditemukan".to_string(),
         ))?
         .value();
     let claims = verify_refresh_token(token_header)?;
     let row_token_db = check_token_refresh(&state.db, &claims.jti, token_header)
         .await
-        .map_err(|e| AppError::Internal(e.to_string()))?;
+        .map_err(|e| AppError::UnauthorizedAuth(0i8,"Un Authorized".to_string(),e.to_string()))?;
     if !row_token_db {
-        return Err(AppError::Internal(
+        return Err(AppError::UnauthorizedAuth(0i8,"Invalid Token".to_string(),
             "Refresh token gagal Tidak ada".to_string(),
         ));
     }
     let access_token = generate_access_token(&claims.sub.to_string(), &claims.roles.to_string())
-        .map_err(|_| AppError::UnauthorizedAuth("Generate token access gagal".to_string()))?;
+        .map_err(|_| AppError::UnauthorizedAuth(0i8,"Un Authorized".to_string(),"Generate token access gagal".to_string()))?;
     let token_encryption = api_token_encrypt(&access_token)?;
     Ok((
         StatusCode::OK,
@@ -81,13 +82,13 @@ pub async fn refresh_full(
     let cookie = jar.get("refresh-token");
     let token_header = cookie
         .ok_or(AppError::UnauthorizedAuth(
-            "Cookie tidak ditemukan".to_string(),
+            0i8,"Cookie not found".to_string(),"Cookie tidak ditemukan".to_string(),
         ))?
         .value();
 
     let result = check_token_refresh_full(&state.db, &token_header)
         .await
-        .map_err(|e| AppError::Internal(e.to_string()))?;
+        .map_err(|e| AppError::UnauthorizedAuth(0i8,"Unauthorized".to_string(),e.to_string()))?;
     Ok((
         StatusCode::OK,
         AppendHeaders([
